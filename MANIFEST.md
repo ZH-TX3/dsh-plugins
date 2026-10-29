@@ -95,7 +95,7 @@ npm run doctor        # 全量自检
 |---|---|
 | dsh-forge | `ef369d7`（分支 `feat/agent-mode`） |
 | dsh-web-notify | `c615d77`（分支 `master`） |
-| dsh-skill-mcp-gate | `2f6d09d`（分支 `main`） |
+| dsh-skill-mcp-gate | `4082e36`（分支 `main`） |
 | 宿主 dsh | `0.2.0-rc.2`（`D:\Program Files\nodejs\node_modules\@deepseek-ai\dsh`，即 nvm 当前版本的 junction） |
 | node | `v24.18.1` |
 
