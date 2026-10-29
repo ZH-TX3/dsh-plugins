@@ -6,6 +6,16 @@
   "description": "DSH 本地插件单一源目录。所有自研与本地改造插件集中于此，profile 以 link:/file: 装载。宿主 peer 包不写进 devDependencies —— 由 scripts/link-host.mjs 用 junction 指向当前运行中的 host，升级 dsh 后重跑一次即可，不存在版本漂移。",
   "scripts": {
     "link-host": "node scripts/link-host.mjs",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "lint": "node scripts/lint.mjs",
+    "specs": "node scripts/check-specs.mjs",
+    "pack": "node scripts/pack-all.mjs",
+    "sub:status": "node scripts/sub.mjs status",
+    "sub:init": "git submodule update --init --recursive",
+    "sub:pull": "node scripts/sub.mjs pull",
+    "sub:save": "node scripts/sub.mjs save",
+    "sub:sync": "node scripts/sub.mjs sync",
+    "sub:check": "node scripts/sub.mjs check",
+    "check": "npm run lint && npm run specs && npm run sub:check"
   }
 }

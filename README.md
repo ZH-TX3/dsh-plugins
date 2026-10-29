@@ -154,6 +154,17 @@ web-notify → workflow-library → session-continuity → skill-mcp-gate → gi
 **版本控制**
 
 - 三个包是 **submodule**（`dsh-forge` / `dsh-web-notify` / `dsh-skill-mcp-gate`）：在它们自己的目录里照常 `commit` + `push`，外层仓记指针。克隆必须带 `--recurse-submodules`。
+- 子模块是 **detached HEAD**，直接 `git commit` 会造出游离提交（`git push` 报 `src refspec does not match any`）。用脚本，别手敲：
+
+| 命令 | 作用 |
+|---|---|
+| `npm run sub:status` | 分支、脏文件、领先/落后、外层指针是否跟上 |
+| `npm run sub:pull` | 拉各子模块跟踪分支（只 `--ff-only`），detached 会先接回分支；指针变了自动 `git add` |
+| `npm run sub:save -- -m "说明"` | 提交并推送各子模块改动，再暂存外层指针 |
+| `npm run sub:sync` | 外层指针跟随远端分支（`submodule update --remote`） |
+| `npm run sub:check` | 断言一致：无脏改动、指针 == HEAD、不落后远端。CI 里也跑 |
+
+  典型循环：改代码 → `npm run sub:save -- -m "feat: xxx"` → `git commit -m "chore: 更新子模块指针"` → push。
 - `dsh-forge` 目前钉在分支 `feat/agent-mode`，它的 `main` 还在后面。
 - `dsh-session-continuity`、`dsh-workflow-library`、`agent-presets-bundle`、`forks/*` 直接由外层仓跟踪。
 
@@ -166,6 +177,7 @@ web-notify → workflow-library → session-continuity → skill-mcp-gate → gi
 **验证**
 
 ```bash
+npm run check                                    # lint + spec + 子模块一致性（CI 同款）
 npm run doctor                                   # 全量自检（推荐每次动配置后跑）
 node dsh-forge/scripts/verify.mjs                # 42 项
 node dsh-web-notify/scripts/selftest.mjs         # 24 项

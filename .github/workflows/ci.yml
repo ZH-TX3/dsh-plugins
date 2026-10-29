@@ -30,6 +30,10 @@ jobs:
       - name: 插件 spec 可解析性
         run: node scripts/check-specs.mjs
 
+      # 子模块：指针 == HEAD、无未提交改动、不落后远端
+      - name: 子模块一致性
+        run: node scripts/sub.mjs check --no-fetch
+
       # 打包不发布，验证产物形态可复现
       - name: 打包试跑
         run: TAG=ci node scripts/pack-all.mjs
