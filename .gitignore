@@ -1,0 +1,15 @@
+# node_modules 里只有指向宿主 dsh 的 junction，不进版本控制。
+node_modules/
+
+# 下列三个包各自有独立 git 仓 + GitHub remote，由它们自己管，不进外层仓。
+# 外层仓只记录它们当前指向的 commit（见 MANIFEST.md）。
+/dsh-forge/
+/dsh-web-notify/
+/dsh-skill-mcp-gate/
+
+# 临时/日志
+*.log
+*.tmp
+.DS_Store
+__pycache__/
+*.pyc

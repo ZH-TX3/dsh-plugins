@@ -1,0 +1,11 @@
+{
+  "name": "dsh-local-plugins",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DSH 本地插件单一源目录。所有自研与本地改造插件集中于此，profile 以 link:/file: 装载。宿主 peer 包不写进 devDependencies —— 由 scripts/link-host.mjs 用 junction 指向当前运行中的 host，升级 dsh 后重跑一次即可，不存在版本漂移。",
+  "scripts": {
+    "link-host": "node scripts/link-host.mjs",
+    "doctor": "node scripts/doctor.mjs"
+  }
+}

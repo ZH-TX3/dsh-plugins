@@ -1,0 +1,41 @@
+{
+  "description": "Session continuity hooks for DSH — handoff detection, load/skip instruction injection, and post-read auto-archive. Context warnings, PreCompact reminders and insight evaluation are intentionally omitted: DSH's Claude Code bridge always sends transcript_path='', does not support the PreCompact event, and discards systemMessage output.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

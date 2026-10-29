@@ -1,0 +1,11 @@
+# dsh-session-continuity bundle patch
+#
+# 装法：
+#   dsh plugin --profile web add <本目录>
+#
+# 这个 patch 只做一件事：插入插件行。插件行同时承担
+#   - host 半边：注册 /dsh-session-continuity/api/handoff 路由
+#   - client 半边：在 conversation.composer.dock 插槽渲染 Handoff 横幅
+- insert:
+    - id: session-continuity
+      name: dsh-session-continuity

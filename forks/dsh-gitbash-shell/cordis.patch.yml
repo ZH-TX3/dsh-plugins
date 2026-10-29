@@ -1,0 +1,52 @@
+# dsh-gitbash-shell bundle patch (route B, v0.39.0)
+#
+# Installed through the official CLI —
+#
+#   dsh plugin --profile <name> add dsh-gitbash-shell
+#
+# — the command reconciles `dsh.profile.bundles` against installed packages
+# and, seeing this declaration, appends dsh-gitbash-shell to the bundle
+# stack. The profile boot then merges this patch, which is ADDITIVE ONLY:
+#
+#   1. insert the plugin row (id `gitbash-shell`, matching the settings
+#      namespace string). Everything the plugin does — the own bash tool over
+#      a PRIVATE Git Bash executor (src/bash-tool.js + src/shell.js), the
+#      declarative preset variants, the terminal adoption, the path dialect —
+#      is runtime work owned by that row. The host's own PowerShell executor
+#      and every official row keep their places untouched; no official
+#      component is disabled, replaced or duplicated here.
+#
+# On non-Windows hosts the row mounts inert: the inline tool patch, the
+# executor construction and the client half are all platform-gated in code.
+#
+# This patch deliberately does NOT flip ANY base row: the web surface's own
+# gates decide which model-facing tools exist, and the plugin's runtime layer
+# composes with them per agent.
+- insert:
+    # Row id 'gitbash-shell' (was 'gitbash-presets' through v0.23.0): dsh >= 0.1.7
+    # keys a plugin's live Config form and the one-shot legacy settings.yaml
+    # import by the row id, so it now matches the settings namespace string.
+    # Older hosts treat the id as opaque.
+    - id: gitbash-shell
+      name: dsh-gitbash-shell
+
+# Edit the dsh-better-sidebar row when it is mounted (their own bundle
+# inserted it; our bundle is later in the stack, so this edit lands on the
+# existing row — empty-config rows absorb it, missing rows warn and skip, so
+# profiles without the sidebar are unaffected). The boot-time shell
+# resolution drives BOTH the spawn chain and the client tab title
+# ('shell.get' name), so pointing config.shell at Git Bash on Windows makes
+# the sidebar terminal open bash AND display a 'bash' tab label; per-open
+# settings overrides (which this plugin also fills) then agree with it.
+#
+# The path is PROBED at boot (v0.39.0, hardening the v0.15-era hardcode that
+# broke on Git installs outside the default directory — issue #13): the two
+# standard install roots are probed via node:fs, and when neither exists the
+# value resolves to '' which the sidebar treats as "no override" (the
+# per-open settings path and the terminal adoption remain the authoritative
+# channels on such machines).
+- id: better-sidebar
+  name: dsh-better-sidebar
+  config:
+    shell: !!js >-
+      (() => { try { if (process.platform !== 'win32') return ''; const fs = process.getBuiltinModule('node:fs'); const pf = (process.env.ProgramFiles ?? process.env.PROGRAMFILES ?? 'C:\\Program Files').replace(/[\\/]+$/, ''); const lad = (process.env.LOCALAPPDATA ?? '').replace(/[\\/]+$/, ''); const candidates = [pf + '\\Git\\bin\\bash.exe', lad === '' ? '' : lad + '\\Programs\\Git\\bin\\bash.exe']; for (const candidate of candidates) { if (candidate !== '' && fs.existsSync(candidate)) return candidate } return '' } catch { return '' } })()

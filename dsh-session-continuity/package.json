@@ -1,0 +1,41 @@
+{
+  "name": "dsh-session-continuity",
+  "version": "1.0.0-dsh.2",
+  "private": true,
+  "description": "DSH 会话连续性插件：save-state skill 把状态写入 .dsh/HANDOFF.md，新开会话时在输入框上方显示横幅，询问是否加载续接。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=18",
+    "dsh": ">=0.2.0-rc.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    },
+    "compatibility": {
+      "dsh": ">=0.2.0-rc.2",
+      "dshReleases": {
+        "0.2.0-rc.2": "compatible"
+      }
+    }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "session-continuity",
+    "handoff"
+  ]
+}

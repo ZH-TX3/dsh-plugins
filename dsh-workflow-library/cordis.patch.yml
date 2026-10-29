@@ -1,0 +1,18 @@
+# dsh-workflow-library — 把 ~/.dsh/workflows/*.workflow.js 变成可触发入口。
+#
+# 安装：
+#   dsh plugin --profile web add file:D:/ds/dsh-plugins/dsh-workflow-library
+#
+# 这一行必须在 HOST 平面（不是某个 preset 里）：
+#   - 命令注册（ctx.commands）本身就是全局的，UI 目录直接读它；
+#   - 引擎实例通过 serviceForAgent(ctx, agent, 'workflowEngine') 按 agent
+#     所属 preset 的 realm 取，所以宿主层不需要自己拥有引擎。
+- insert:
+    - id: workflow-library
+      name: '@local/dsh-workflow-library'
+      config:
+        # 命令名只允许 /^[a-z][a-z0-9_-]*$/（dsh-commands 的 COMMAND_NAME），
+        # 冒号不合法，所以是 /wf-<name> 而不是 /wf:<name>。
+        commandPrefix: 'wf-'
+        toolName: workflow_library
+        maxResultChars: 50000

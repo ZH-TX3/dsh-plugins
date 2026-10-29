@@ -1,0 +1,8 @@
+{
+  "id": "@deeptrial/dsh-bash-rtk",
+  "version": "0.1.2-local.1",
+  "main": "./lib/index.js",
+  "engines": {
+    "dsh": ">=0.2.0-rc.2 <0.3.0"
+  }
+}

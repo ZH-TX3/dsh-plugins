@@ -1,0 +1,25 @@
+{
+  "name": "@local/dsh-agent-presets",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "自定义 Agent 预设：Router Standard / Router Spec / Demo Agent / 梁神模式 / 边界扩展模式",
+  "icon": "./icon.svg",
+  "dsh": {
+    "bundle": {
+      "patch": [
+        "./presets/router-standard.patch.yml",
+        "./presets/router-spec.patch.yml",
+        "./presets/demo-agent.patch.yml",
+        "./presets/liangshen.patch.yml",
+        "./presets/edge-agent.patch.yml"
+      ]
+    },
+    "compatibility": {
+      "dsh": ">=0.2.0-rc.2",
+      "dshReleases": {
+        "0.2.0-rc.2": "compatible"
+      }
+    }
+  }
+}

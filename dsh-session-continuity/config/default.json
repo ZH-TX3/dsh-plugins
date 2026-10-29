@@ -1,0 +1,7 @@
+{
+  "handler": "plugin",
+  "handoff": {
+    "promptMode": "reply",
+    "staleDays": 3
+  }
+}
