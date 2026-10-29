@@ -48,9 +48,22 @@ if (!pkg) {
     const abs = target.startsWith('D:') || target.startsWith('C:') ? target : resolve(profileDir, target)
     existsSync(abs) ? ok(`${name} → ${abs}`) : bad(`${name} → ${abs} 不存在`)
   }
+  for (const [name, spec] of Object.entries(pkg.dependencies ?? {})) {
+    if (/^https?:/.test(spec)) {
+      warn(`${name} 从 release URL 装（不跟随源码改动；本机开发应换成 link:）`)
+    }
+  }
   const bundles = new Set(pkg.dsh?.profile?.bundles ?? [])
-  for (const [name] of local) {
-    if (!bundles.has(name)) warn(`${name} 装了但不在 dsh.profile.bundles 里（不会加载）`)
+  // 只提醒「确实是插件包、又没被任何方式接线」的依赖：库、手工 insert、市场停用都不算问题
+  const marketDisabled = new Set(readJson(join(profileDir, '.dsh-market', 'state.json'))?.disabled ?? [])
+  const patchText = (() => { try { return readFileSync(join(profileDir, 'cordis.patch.yml'), 'utf8') } catch { return '' } })()
+  for (const [name] of Object.entries(pkg.dependencies ?? {})) {
+    if (bundles.has(name)) continue
+    const meta = readJson(join(profileDir, 'node_modules', name, 'package.json'))
+    if (!meta?.dsh?.bundle) continue
+    if (patchText.includes(name)) continue
+    if (marketDisabled.has(name)) continue
+    warn(`${name} 是插件包但没接线（不在 bundles、patch、也没被市场停用）`)
   }
 }
 

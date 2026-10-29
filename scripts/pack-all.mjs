@@ -92,4 +92,17 @@ const notes = [
 ].join('\n')
 writeFileSync(join(dist, 'RELEASE.md'), notes)
 
-console.log(`\n  ${rows.length} 个包 → dist/（含 manifest.json、RELEASE.md）`)
+// 给「另一台机器复现当前状态」用的现成片段：直接合进 profile 的 package.json
+const fragment = {
+  $comment: '把 dependencies 合进 profile 的 package.json，并把 bundles 里的包名加进 dsh.profile.bundles',
+  tag,
+  dependencies: Object.fromEntries(rows.map((r) => [r.package, r.url])),
+  bundles: rows.map((r) => r.package),
+  verification: {
+    why: '装完后跑一次，确认 spec 在 profile 的 node_modules 里能解析',
+    command: 'node -e "import(\'@local/dsh-forge/features/persona/index.js\').then(()=>console.log(\'ok\'))"',
+  },
+}
+writeFileSync(join(dist, 'profile-fragment.json'), JSON.stringify(fragment, null, 2) + '\n')
+
+console.log(`\n  ${rows.length} 个包 → dist/（含 manifest.json、RELEASE.md、profile-fragment.json）`)

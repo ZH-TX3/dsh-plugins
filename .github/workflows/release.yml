@@ -56,9 +56,9 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
           gh release create "$TAG" \
-            dist/*.tgz dist/manifest.json dist/RELEASE.md \
+            dist/*.tgz dist/manifest.json dist/RELEASE.md dist/profile-fragment.json \
             --title "$TAG" \
             --notes-file dist/RELEASE.md \
             --latest \
-          || gh release upload "$TAG" dist/*.tgz dist/manifest.json dist/RELEASE.md --clobber
+          || gh release upload "$TAG" dist/*.tgz dist/manifest.json dist/RELEASE.md dist/profile-fragment.json --clobber
           echo "已发布：$(gh release view "$TAG" --json url -q .url)"

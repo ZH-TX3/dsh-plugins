@@ -187,7 +187,51 @@ git tag v0.1.0 && git push origin v0.1.0
 
 本地想验产物：`TAG=v0.1.0 node scripts/pack-all.mjs`，产物落在 `dist/`（已 gitignore）。
 
-## 七、目录结构
+## 七、复现与分发
+
+三种角色，三种装法，互不干扰：
+
+| 角色 | 用什么 | 改源码是否生效 |
+|---|---|---|
+| 本机日常开发 | `link:D:/ds/dsh-plugins/<pkg>` | ✅ 立刻生效 |
+| 另一台机器复现某个 release | release 里的 `.tgz` URL | ❌ 锁死版本 |
+| 给别人装单个插件 | 单包 `.tgz` URL | ❌ |
+
+每个 release 都带 `profile-fragment.json`，就是给「另一台机器」用的现成片段：
+
+```jsonc
+{
+  "dependencies": {
+    "@local/dsh-forge": "https://github.com/ZH-TX3/dsh-plugins/releases/download/v0.1.1/local-dsh-forge-0.2.0.tgz",
+    // …另外 5 个
+  },
+  "bundles": ["@local/dsh-forge", "dsh-web-notify", "dsh-skill-mcp-gate", "…"]
+}
+```
+
+复现步骤（在新机器上）：
+
+1. 打开目标 profile 的 `package.json`（通常 `~/.dsh/profiles/<name>/package.json`）。
+2. 把 `profile-fragment.json` 的 `dependencies` 合进 `dependencies`。
+3. 把 `bundles` 里的包名**追加**进 `dsh.profile.bundles` —— 少了这步包装了也不加载。
+4. `cd ~/.dsh/profiles/<name> && pnpm install`。
+5. 重启宿主，然后验证 spec 真能解析：
+
+```bash
+node -e "import('@local/dsh-forge/features/persona/index.js').then(()=>console.log('ok'))"
+```
+
+校验完整性：`manifest.json` 里有每个包的 sha256，比对下载到的 `.tgz` 即可。
+
+**复现的边界**：release 只锁插件代码。profile 里的其他东西——LLM provider、权限预设、`gitbash-shell` 的 `bashPath`、`disabled` 行——属于机器配置，不在这个仓里。跨机器复现前先确认主机版本一致（本仓基线见 `MANIFEST.md`）。
+
+**换版本**：URL 里带版本号，改 tag 段就行。回滚 = 换回旧 tag 的 URL + `pnpm install`。
+
+**tarball 装法的代价**：改源码不再生效，`git diff` 和运行中的代码可能不同步。所以本机请保持 `link:` —— `doctor.mjs` 看到 `https:` 依赖会明确提醒这一点。
+
+**forks 不在分发池**：`forks/dsh-gitbash-shell`、`forks/dsh-bash-rtk` 是上游项目的本地补丁，版本与授权归上游。别的机器要用，只能从上游装 + 重放 `LOCAL PATCH`。
+
+## 八、目录结构
 
 ```
 D:\ds\dsh-plugins\
