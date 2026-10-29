@@ -109,6 +109,9 @@ npm run doctor        # 全量自检
   在它们自己的目录里照常 commit + push，外层仓记录指针。克隆要带递归：
   `git clone --recurse-submodules https://github.com/ZH-TX3/dsh-plugins.git`。
   外层仓提交后如果子模块指针变了，记得一起提交。
+- `~/.dsh` 已不再是 git 仓库（2026-10-29 删除）。插件改动的版本控制在**这里**；
+  迁移前的历史归档为 `D:\ds\dsh-home-20261029.bundle`，回看：
+  `git clone D:/ds/dsh-home-20261029.bundle /tmp/h && git -C /tmp/h log`。
 - `presets/*.patch.yml` 与 `dsh-forge/cordis.patch.yml` 里的插件 spec 是
   `file:///D:/ds/dsh-plugins/...` **绝对路径**：换目录/换机必改。`doctor.mjs` 第 2 项
   会一次性列出所有失效路径。
