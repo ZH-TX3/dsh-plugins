@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  static:
+    name: 静态检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # 只为了解析 YAML；不写进 package.json，避免污染 lockfile
+      - name: 装 yaml
+        run: npm i --no-save yaml@2
+
+      - name: 语法 / JSON / YAML 解析
+        run: node scripts/lint.mjs
+
+      # 核心断言：patch 里的插件 spec 不许出现绝对路径，且必须指向真文件
+      - name: 插件 spec 可解析性
+        run: node scripts/check-specs.mjs
+
+      # 打包不发布，验证产物形态可复现
+      - name: 打包试跑
+        run: TAG=ci node scripts/pack-all.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tgz-preview
+          path: dist/
+          retention-days: 7

@@ -77,6 +77,19 @@ npm run doctor        # 全量自检
 8. 快照：`profiles/web/package.json` + `pnpm-lock.yaml` + 三个内仓的 commit
    （下表）一起存档，回滚时三者必须同步。
 
+## 分发形态
+
+| 形态 | 举例 | 用途 |
+|---|---|---|
+| `link:` | `link:D:/ds/dsh-plugins/dsh-forge` | 日常开发，改文件即生效 |
+| `file:` | `file:D:/ds/dsh-plugins/forks/dsh-gitbash-shell` | 两个 fork |
+| release `.tgz` | `https://github.com/ZH-TX3/dsh-plugins/releases/download/v0.1.0/local-dsh-forge-0.2.0.tgz` | 分发、回滚、给别人装 |
+
+打 tag（`v*`）触发 `.github/workflows/release.yml`：两道静态检查 → 工作区必须干净 →
+`scripts/pack-all.mjs` 打 6 个第一方包 → 上传 `.tgz` + `manifest.json` + `RELEASE.md`。
+`.github/workflows/ci.yml` 在 push/PR 上跑同样的检查 + 试打包。
+产物文件名来自 `npm pack`，会剥掉 scope（`@local/dsh-forge` → `local-dsh-forge-0.2.0.tgz`）。
+
 ## 各包对本机 dsh 的依赖强度（升级风险排序）
 
 | 包 | 依赖点 | 断点 |
@@ -93,7 +106,7 @@ npm run doctor        # 全量自检
 
 | 包 | commit / 版本 |
 |---|---|
-| dsh-forge | `ef369d7`（分支 `feat/agent-mode`） |
+| dsh-forge | `4b0b7a2`（分支 `feat/agent-mode`） |
 | dsh-web-notify | `c615d77`（分支 `master`） |
 | dsh-skill-mcp-gate | `4082e36`（分支 `main`） |
 | 宿主 dsh | `0.2.0-rc.2`（`D:\Program Files\nodejs\node_modules\@deepseek-ai\dsh`，即 nvm 当前版本的 junction） |
@@ -112,6 +125,7 @@ npm run doctor        # 全量自检
 - `~/.dsh` 已不再是 git 仓库（2026-10-29 删除）。插件改动的版本控制在**这里**；
   迁移前的历史归档为 `D:\ds\dsh-home-20261029.bundle`，回看：
   `git clone D:/ds/dsh-home-20261029.bundle /tmp/h && git -C /tmp/h log`。
-- `presets/*.patch.yml` 与 `dsh-forge/cordis.patch.yml` 里的插件 spec 是
-  `file:///D:/ds/dsh-plugins/...` **绝对路径**：换目录/换机必改。`doctor.mjs` 第 2 项
-  会一次性列出所有失效路径。
+- `presets/*.patch.yml` 与 `dsh-forge/cordis.patch.yml` 里的插件 spec 是**包名 + 包内路径**
+  （`@local/dsh-forge/features/persona/index.js`），没有绝对路径。这是为了 `link:` / `file:` /
+  `.tgz` 三种装法解析到同一份代码。`scripts/check-specs.mjs`（CI 也跑）与 `doctor.mjs` 第 2 项
+  会拦下绝对路径、`./` 相对路径、以及指向不存在文件的 spec。

@@ -1,0 +1,64 @@
+name: release
+
+# 打 tag 即发布：v0.1.0 / v2026.10.29 / 任何 v* 都行
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: 打包并发布
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 装 yaml
+        run: npm i --no-save yaml@2
+
+      # 坏的东西不许发布出去
+      - name: 静态检查
+        run: |
+          node scripts/lint.mjs
+          node scripts/check-specs.mjs
+
+      # tag 打在有未提交改动的树上时，产物和仓库内容会不一致
+      - name: 工作区必须干净
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::工作区有未提交改动，拒绝打包"
+            git status --porcelain
+            exit 1
+          fi
+
+      - name: 打包
+        run: |
+          TAG="${GITHUB_REF_NAME}" node scripts/pack-all.mjs
+          echo "--- 产物 ---"
+          ls -1 dist/
+
+      - name: 发布
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          gh release create "$TAG" \
+            dist/*.tgz dist/manifest.json dist/RELEASE.md \
+            --title "$TAG" \
+            --notes-file dist/RELEASE.md \
+            --latest \
+          || gh release upload "$TAG" dist/*.tgz dist/manifest.json dist/RELEASE.md --clobber
+          echo "已发布：$(gh release view "$TAG" --json url -q .url)"

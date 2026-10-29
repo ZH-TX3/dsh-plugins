@@ -4,6 +4,8 @@
 
 目标很简单：**改一个文件就该生效，不用记它在哪**。为此所有自研包都用 `link:` 装上，跨目录、跨盘、跨 profile 都不需要复制。
 
+[![ci](https://github.com/ZH-TX3/dsh-plugins/actions/workflows/ci.yml/badge.svg)](https://github.com/ZH-TX3/dsh-plugins/actions/workflows/ci.yml)
+
 - 目标宿主：dsh `0.2.0-rc.2`（node ≥ 20，实测 v24.18.1）
 - 详细运维手册（装载矩阵、升级 SOP、逐包依赖断点）：[`MANIFEST.md`](./MANIFEST.md)
 
@@ -14,12 +16,19 @@ npm run link-host     # 把宿主 peer 包 junction 到本目录（否则部分�
 npm run doctor        # 自检：装载条目 / 绝对路径 / junction / 兼容声明
 ```
 
-装进某个 profile（示例 `web`）：
+装进某个 profile（示例 `web`），三种来源任选：
 
 ```bash
+# 1) 本地源码（开发用，改文件即生效）
 dsh plugin --profile web add link:D:/ds/dsh-plugins/dsh-skill-mcp-gate
-# 或直接编辑 profiles/web/package.json 的 dependencies + dsh.profile.bundles，再 pnpm install
+
+# 2) release 里的 .tgz（锁版本、可复现、不需要本仓）
+dsh plugin --profile web add https://github.com/ZH-TX3/dsh-plugins/releases/download/v0.1.0/dsh-skill-mcp-gate-0.13.1.tgz
+
+# 3) 直接编辑 profiles/web/package.json 的 dependencies + dsh.profile.bundles，再 pnpm install
 ```
+
+每个 release 都带 `manifest.json`（包名 → 版本 → 文件名 → sha256 → URL）和 `RELEASE.md`（可直接粘的 dependencies 片段）。
 
 ---
 
@@ -67,6 +76,7 @@ node dsh-forge/scripts/mods-check.mjs  # 5 项 mod 管线
 |---|---|---|
 | `link:D:/ds/dsh-plugins/x` | **真软链**。改源码立刻生效，加文件也立刻可见 | 全部自研包（6 个） |
 | `file:D:/ds/dsh-plugins/forks/x` | pnpm 复制/硬链进 profile 的 `node_modules`。**改源码通常不生效**，要 `pnpm install` | 两个第三方 fork |
+| `https://…/releases/download/v…/x.tgz` | 从 release 装打包好的 tarball。完全脱离本仓，锁死版本 | 分发、给别人装、回滚 |
 
 fork 为什么不用 `link:`：它们靠「重放 LOCAL PATCH」升级，装进 profile 树里能直接从 profile 的 `node_modules` 解析宿主 peer；改成 `link:` 反而多一层依赖。
 
@@ -132,7 +142,7 @@ web-notify → workflow-library → session-continuity → skill-mcp-gate → gi
 
 **路径**
 
-- 预设立行里的插件 spec 是 `file:///D:/ds/dsh-plugins/...` **绝对路径**（预设子行不走 Loader 的相对解析）。换目录/换机器必须改，`doctor.mjs` 第 2 项会一次性列出所有失效行。
+- 预设子行的插件 spec 必须是**包名 + 包内路径**（`@local/dsh-forge/features/persona/index.js`），不许绝对路径或 `./` 相对路径。预设子行不走 Loader 的相对解析（baseUrl 是 profile 根），但裸包名走 profile 的 `node_modules` —— 于是 `link:` / `file:` / `.tgz` 三种装法解析到同一份代码。`scripts/check-specs.mjs` 与 `doctor.mjs` 第 2 项都会拦，CI 里也跑。
 - `~/.dsh/skills/save-state` 是指向 `dsh-session-continuity/skills/save-state` 的 junction，由插件在宿主启动时维护。改路径后**先删旧链接**再重启，否则会留一条死链。
 - 跨盘 junction（C: → D:）可用，但本目录必须是**本地固定盘**，别放外接盘或 OneDrive 同步目录。
 
@@ -164,7 +174,20 @@ cd dsh-skill-mcp-gate && npm test                # 18 组
 
 ---
 
-## 六、目录结构
+## 六、发布（tag 触发）
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+- `.github/workflows/ci.yml` —— push / PR：`lint.mjs`（语法+JSON+YAML）、`check-specs.mjs`（spec 可解析性）、`pack-all.mjs` 试打包，产物作为 artifact 留 7 天。
+- `.github/workflows/release.yml` —— 打 `v*` tag：同样两道检查 → 断言工作区干净 → `pack-all.mjs` 打包 6 个第一方包 → `gh release create` 上传 `.tgz` + `manifest.json` + `RELEASE.md`。重跑同一个 tag 会用 `--clobber` 覆盖资产。
+
+发布范围是 6 个第一方包；`forks/` 下两个是上游项目的本地补丁，版本与授权归上游，不从本仓发。
+
+本地想验产物：`TAG=v0.1.0 node scripts/pack-all.mjs`，产物落在 `dist/`（已 gitignore）。
+
+## 七、目录结构
 
 ```
 D:\ds\dsh-plugins\

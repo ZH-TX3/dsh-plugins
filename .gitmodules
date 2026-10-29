@@ -1,9 +1,14 @@
 [submodule "dsh-forge"]
 	path = dsh-forge
 	url = https://github.com/ZH-TX3/dsh-forge.git
+	branch = feat/agent-mode
+
 [submodule "dsh-web-notify"]
 	path = dsh-web-notify
 	url = https://github.com/ZH-TX3/dsh-web-notify.git
+	branch = master
+
 [submodule "dsh-skill-mcp-gate"]
 	path = dsh-skill-mcp-gate
 	url = https://github.com/ZH-TX3/dsh-skill-mcp-gate.git
+	branch = main

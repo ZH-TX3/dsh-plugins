@@ -3,6 +3,9 @@ node_modules/
 
 # 下列三个包是 submodule（各自独立仓 + GitHub remote），由 .gitmodules 管。
 
+# 打包产物（npm pack 落在 dist/）
+dist/
+
 # 临时/日志
 *.log
 *.tmp

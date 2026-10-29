@@ -68,7 +68,7 @@
           #   spec — 深度思考优先: classified persona + full prompt sections; the long
           #     first-turn reasoning chain (101K chars) is a feature, not a defect.
           - id: router-bootstrap
-            name: 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/router-standard/router-bootstrap-v1.mjs'
+            name: '@local/dsh-agent-presets/modules/router-standard/router-bootstrap-v1.mjs'
             config:
               routerMode: standard
 

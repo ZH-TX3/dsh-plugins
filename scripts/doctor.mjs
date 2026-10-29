@@ -12,6 +12,7 @@
  *   DSH 升级后第一件事就是跑这个。
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { checkPatchSpecs } from './check-specs.mjs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
@@ -53,26 +54,13 @@ if (!pkg) {
   }
 }
 
-/* 2. patch 里的绝对 path */
-console.log('\n[2] patch 里的 file:/// 绝对路径')
-const walk = (dir, out = []) => {
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.name === 'node_modules' || e.name === '.git') continue
-    const p = join(dir, e.name)
-    if (e.isDirectory()) walk(p, out)
-    else if (/\.(patch\.yml|yml)$/.test(e.name)) out.push(p)
-  }
-  return out
-}
-for (const file of walk(root)) {
-  const text = readFileSync(file, 'utf8')
-  const refs = [...text.matchAll(/file:\/\/\/([A-Za-z]:[^\s'"#]+)/g)].map((m) => m[1])
-  if (!refs.length) continue
-  const missing = refs.filter((r) => !existsSync(r.replace(/\//g, '\\')))
-  const short = file.slice(root.length + 1)
-  missing.length
-    ? bad(`${short}: ${missing.length}/${refs.length} 个路径不存在，首个 = ${missing[0]}`)
-    : ok(`${short}: ${refs.length} 个路径均存在`)
+/* 2. patch 里的插件 spec（与 CI 共用 check-specs.mjs） */
+console.log('\n[2] patch 里的插件 spec')
+{
+  const { problems, notes } = checkPatchSpecs(root)
+  for (const n of notes) console.log(`  note ${n}`)
+  for (const p of problems) bad(p)
+  if (!problems.length) ok('全部 spec 都是包名 + 包内路径，且指向真文件')
 }
 
 /* 3. 宿主 junction */

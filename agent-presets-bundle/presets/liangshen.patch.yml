@@ -68,7 +68,7 @@
           # bootstrap pair until a NEW durable tool call exists past the boundary
           # (epoch-aware, see compaction-epoch.mjs).
           - id: tool-bootstrap
-            name: 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen/tool-bootstrap.mjs'
+            name: '@local/dsh-agent-presets/modules/liangshen/tool-bootstrap.mjs'
             config:
               bootstrapTools: [bash, str_replace_editor]
               promoteOn: tool-call
@@ -95,7 +95,7 @@
           # exist; read them before acting" — and the model reads the files itself via
           # the filesystem tools when relevant.
           - id: instruction-hint
-            name: 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen/instruction-hint.mjs'
+            name: '@local/dsh-agent-presets/modules/liangshen/instruction-hint.mjs'
             config:
               promoteOn: tool-call
               includeSubagents: true
@@ -173,7 +173,7 @@
           # No OS sandbox confinement on Windows (landlock is linux-only); the tool
           # description says so.
           - id: custom-bash
-            name: 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen/custom-bash.mjs'
+            name: '@local/dsh-agent-presets/modules/liangshen/custom-bash.mjs'
             disabled: !!js process.platform !== 'win32'
 
           # ── filesystem ──────────────────────────────────────────────────────────────
@@ -237,7 +237,7 @@
             name: '@deepseek-ai/dsh-skill-filesystem'
 
           - id: skill-search
-            name: 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen/skill-search.mjs'
+            name: '@local/dsh-agent-presets/modules/liangshen/skill-search.mjs'
           # ── goals ───────────────────────────────────────────────────────────────────
 
           # Only the model-facing tool. The goal SERVICE, its session driver, and the

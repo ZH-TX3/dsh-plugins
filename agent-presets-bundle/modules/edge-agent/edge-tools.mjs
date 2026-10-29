@@ -30,7 +30,7 @@
  * CONFIG (optional; unconfigured means the tool says what to set):
  *
  *   - id: edge-tools
- *     name: 'file:///.../edge-tools.mjs'
+ *     name: '@local/dsh-agent-presets/modules/edge-agent/edge-tools.mjs'
  *     config:
  *       vision:
  *         provider: test        # a registered provider route

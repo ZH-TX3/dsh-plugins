@@ -95,7 +95,7 @@
           # actually have. Unconfigured, `vision_describe` fails with an
           # actionable message instead of guessing.
           - id: edge-tools
-            name: 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/edge-agent/edge-tools.mjs'
+            name: '@local/dsh-agent-presets/modules/edge-agent/edge-tools.mjs'
             config:
               vision:
                 provider: test
