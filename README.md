@@ -154,17 +154,23 @@ web-notify → workflow-library → session-continuity → skill-mcp-gate → gi
 **版本控制**
 
 - 三个包是 **submodule**（`dsh-forge` / `dsh-web-notify` / `dsh-skill-mcp-gate`）：在它们自己的目录里照常 `commit` + `push`，外层仓记指针。克隆必须带 `--recurse-submodules`。
-- 子模块是 **detached HEAD**，直接 `git commit` 会造出游离提交（`git push` 报 `src refspec does not match any`）。用脚本，别手敲：
+- 子模块有两个容易踩的行为，先记住再看命令：
 
-| 命令 | 作用 |
+  1. **主仓 `pull` 不会自动同步子模块工作区。** 主仓里存的只是「某个 commit」的指针；`git pull` 换掉指针后，子模块目录还停在旧 commit 上。必须再跑 `npm run sub:update`（= `git submodule update --init --recursive`）。
+  2. **detached HEAD 是子模块的默认状态，不是错误。** 主仓锁 commit 而不锁分支，所以同步后子模块必然在 detached 上，也可能比远端分支旧若干提交——都正常。只有要**改**子模块代码时才 `npm run sub:work` 切到分支。
+
+| 命令 | 什么时候用 |
 |---|---|
-| `npm run sub:status` | 分支、脏文件、领先/落后、外层指针是否跟上 |
-| `npm run sub:pull` | 拉各子模块跟踪分支（只 `--ff-only`），detached 会先接回分支；指针变了自动 `git add` |
-| `npm run sub:save -- -m "说明"` | 提交并推送各子模块改动，再暂存外层指针 |
-| `npm run sub:sync` | 外层指针跟随远端分支（`submodule update --remote`） |
-| `npm run sub:check` | 断言一致：无脏改动、指针 == HEAD、不落后远端。CI 里也跑 |
+| `npm run sub:status` | 想看当前状态（分支/指针、脏文件、领先落后） |
+| `npm run sub:update` | **主仓 pull 之后必跑**，把工作区对齐到主仓指针 |
+| `npm run sub:work [名字]` | 要改子模块代码，切到跟踪分支 |
+| `npm run sub:save -- -m "说明"` | 改完提交 + 推送 + 暂存外层指针（detached 时会拒绝，提示先 `work`） |
+| `npm run sub:follow` | 让子模块跟到远端分支最新（会移动指针，发布前用） |
+| `npm run sub:check` | 一致性断言：只拦「脏改动」和「指针 ≠ HEAD」；detached、落后远端都不算错。CI 里跑 |
+| `npm run sub:setup` | 可选：写 `submodule.recurse=true`，以后 `git pull` 自动带上子模块（代价是 `git checkout` 也会动子模块工作区） |
 
-  典型循环：改代码 → `npm run sub:save -- -m "feat: xxx"` → `git commit -m "chore: 更新子模块指针"` → push。
+  改代码的循环：`sub:work` → 改 → `npm run sub:save -- -m "feat: xxx"` → `git commit -m "chore: 更新子模块指针"` → push。
+  只读的循环：`git pull` → `npm run sub:update` → 干活。
 - `dsh-forge` 目前钉在分支 `feat/agent-mode`，它的 `main` 还在后面。
 - `dsh-session-continuity`、`dsh-workflow-library`、`agent-presets-bundle`、`forks/*` 直接由外层仓跟踪。
 

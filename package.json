@@ -11,11 +11,12 @@
     "specs": "node scripts/check-specs.mjs",
     "pack": "node scripts/pack-all.mjs",
     "sub:status": "node scripts/sub.mjs status",
-    "sub:init": "git submodule update --init --recursive",
-    "sub:pull": "node scripts/sub.mjs pull",
+    "sub:update": "node scripts/sub.mjs update",
+    "sub:work": "node scripts/sub.mjs work",
     "sub:save": "node scripts/sub.mjs save",
-    "sub:sync": "node scripts/sub.mjs sync",
+    "sub:follow": "node scripts/sub.mjs follow",
     "sub:check": "node scripts/sub.mjs check",
+    "sub:setup": "node scripts/sub.mjs setup",
     "check": "npm run lint && npm run specs && npm run sub:check"
   }
 }
