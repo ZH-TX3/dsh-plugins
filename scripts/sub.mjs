@@ -59,6 +59,11 @@ function pointer(path) {
   return tryGit(['ls-tree', 'HEAD', path])?.match(/^160000 commit ([0-9a-f]{40})\t/)?.[1] ?? null
 }
 
+/** 暂存区里的指针（git add 之后、commit 之前） */
+function stagedPointer(path) {
+  return tryGit(['ls-files', '-s', '--', path])?.match(/^160000 ([0-9a-f]{40}) 0\t/)?.[1] ?? null
+}
+
 function info(sub) {
   const dir = join(root, sub.path)
   const head = tryGit(['rev-parse', 'HEAD'], dir)
@@ -77,7 +82,8 @@ function info(sub) {
     if (lr) [ahead, behind] = lr.split(/\s+/).map(Number)
   }
   const ptr = pointer(sub.path)
-  return { ...sub, head, ref, detached, branch, dirty, ahead, behind, ptr, pointerDiffers: Boolean(ptr && ptr !== head) }
+  const staged = stagedPointer(sub.path)
+  return { ...sub, head, ref, detached, branch, dirty, ahead, behind, ptr, staged, pointerDiffers: Boolean(ptr && ptr !== head) }
 }
 
 const pad = (s, n) => String(s ?? '-').padEnd(n)
@@ -184,7 +190,20 @@ switch (cmd) {
     for (const sub of rows.map(info)) {
       if (sub.missing) { problems.push(`${sub.path}: 未初始化（git submodule update --init）`); continue }
       if (sub.dirty.length) problems.push(`${sub.path}: 有 ${sub.dirty.length} 个未提交改动`)
-      if (sub.pointerDiffers) problems.push(`${sub.path}: 指针 ${sub.ptr.slice(0, 8)} ≠ HEAD ${sub.head.slice(0, 8)}（改了没提交外层指针？）`)
+      if (sub.pointerDiffers) {
+        const hint = sub.staged === sub.head ? '已暂存，等 git commit' : 'git add 一下再提交'
+        problems.push(`${sub.path}: 指针 ${sub.ptr.slice(0, 8)} ≠ 子模块 HEAD ${sub.head.slice(0, 8)}（${hint}）`)
+      }
+
+      // 最阴的一条：指针钉在一个只存在本地的 commit 上。别人 clone 时该对象不存在，
+      // 整个子模块目录直接是空的，而且错误要到那时候才出现。
+      if (sub.head) {
+        const refs = tryGit(['for-each-ref', '--contains', sub.head, '--format=%(refname)', 'refs/remotes/'], join(root, sub.path))
+        if (refs === null || refs.trim() === '') {
+          problems.push(`${sub.path}: HEAD ${sub.head.slice(0, 8)} 不在任何远端分支上（没 push？clone 方会断链）`)
+        }
+      }
+
       // detached 是默认态、落后远端也正常（主仓锁的是 commit），只作提示
       if (sub.detached) console.log(`  note  ${sub.path}: detached HEAD（默认态，改代码前 npm run sub:work）`)
       if (sub.behind) console.log(`  note  ${sub.path}: 比 origin/${sub.branch} 旧 ${sub.behind} 个提交（正常：主仓锁 commit）`)
