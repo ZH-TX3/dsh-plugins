@@ -1,5 +1,12 @@
 # DSH 本地插件 —— 单一源目录
 
+仓库：<https://github.com/ZH-TX3/dsh-plugins>（public）
+
+```bash
+git clone --recurse-submodules https://github.com/ZH-TX3/dsh-plugins.git D:/ds/dsh-plugins
+cd D:/ds/dsh-plugins && npm run link-host
+```
+
 `D:\ds\dsh-plugins` 是**所有本地维护插件唯一的源码位置**。`~/.dsh` 只保留运行态
 （sessions / storages / profiles / skills / workflows），不再存放任何插件源码。
 
@@ -10,9 +17,9 @@ D:\ds\dsh-plugins\
 ├─ scripts\
 │  ├─ link-host.mjs          # 把宿主 peer 包 junction 到 ./node_modules（升级后必跑）
 │  └─ doctor.mjs             # 一次性自检：条目/绝对路径/junction/兼容声明
-├─ dsh-forge\                # 独立仓 → ZH-TX3/dsh-forge         （预设，非全局补丁）
-├─ dsh-web-notify\           # 独立仓 → ZH-TX3/dsh-web-notify     （web client）
-├─ dsh-skill-mcp-gate\       # 独立仓 → ZH-TX3/dsh-skill-mcp-gate（host + web client）
+├─ dsh-forge\                # submodule → ZH-TX3/dsh-forge         （预设，非全局补丁）
+├─ dsh-web-notify\           # submodule → ZH-TX3/dsh-web-notify     （web client）
+├─ dsh-skill-mcp-gate\       # submodule → ZH-TX3/dsh-skill-mcp-gate（host + web client）
 ├─ dsh-session-continuity\   # 外层仓跟踪
 ├─ dsh-workflow-library\     # 外层仓跟踪
 ├─ agent-presets-bundle\     # 外层仓跟踪（5 个 agent 预设 patch）
@@ -86,9 +93,9 @@ npm run doctor        # 全量自检
 
 | 包 | commit / 版本 |
 |---|---|
-| dsh-forge | `c246acc`（GitHub ZH-TX3/dsh-forge） |
-| dsh-web-notify | `4f13067`（GitHub ZH-TX3/dsh-web-notify） |
-| dsh-skill-mcp-gate | `2f6d09d`（GitHub ZH-TX3/dsh-skill-mcp-gate） |
+| dsh-forge | `ef369d7`（分支 `feat/agent-mode`） |
+| dsh-web-notify | `c615d77`（分支 `master`） |
+| dsh-skill-mcp-gate | `2f6d09d`（分支 `main`） |
 | 宿主 dsh | `0.2.0-rc.2`（`D:\Program Files\nodejs\node_modules\@deepseek-ai\dsh`，即 nvm 当前版本的 junction） |
 | node | `v24.18.1` |
 
@@ -98,8 +105,10 @@ npm run doctor        # 全量自检
   必须是本地固定盘，不要放外接盘或 OneDrive 同步目录。
 - **`~/.dsh/skills/save-state`** 是指向 `dsh-session-continuity/skills/save-state` 的
   junction，由插件 `ensureSkillLink()` 维护。搬家/换路径后要先删旧链接再重启宿主。
-- **三个内仓不被外层仓跟踪**（`.gitignore` 排除），各自 `git push`；外层仓只记录它们的
-  commit，见上表。
+- **三个包是 git submodule**（`dsh-forge` / `dsh-web-notify` / `dsh-skill-mcp-gate`），
+  在它们自己的目录里照常 commit + push，外层仓记录指针。克隆要带递归：
+  `git clone --recurse-submodules https://github.com/ZH-TX3/dsh-plugins.git`。
+  外层仓提交后如果子模块指针变了，记得一起提交。
 - `presets/*.patch.yml` 与 `dsh-forge/cordis.patch.yml` 里的插件 spec 是
   `file:///D:/ds/dsh-plugins/...` **绝对路径**：换目录/换机必改。`doctor.mjs` 第 2 项
   会一次性列出所有失效路径。

@@ -270,7 +270,7 @@ agent.inject({
 
 `hooks/hooks.json`、`session-start.py`、`user-prompt-submit.py`、`post-tool-use.py` 仍在仓库里，但本机 profile 已 `disabled: true`。
 
-原因：DSH 的 hook 桥接通过 `ctx.shell` 执行 `python ...`，而宿主默认权限是 `workspace-write`；Windows ACL runner 要求 temp root 位于 workspace 之外，实际 workspace 被判成 `C:\Users\陈强`，于是每次 hook 都失败：
+原因：DSH 的 hook 桥接通过 `ctx.shell` 执行 `python ...`，而宿主默认权限是 `workspace-write`；Windows ACL runner 要求 temp root 位于 workspace 之外，实际 workspace 被判成用户主目录，于是每次 hook 都失败：
 
 ```text
 sandbox mode "workspace-write" is requested but no sandbox backend is usable on this host
@@ -344,8 +344,8 @@ DSH 只从这些根扫描 skill（`dsh-skill-filesystem`）：
 因此只维护 `plugins/dsh-session-continuity/skills/save-state/SKILL.md` 这一份，安装/升级/重启宿主后无需手工建链。需要修复时也可以手动执行：
 
 ```bat
-mklink /J "C:\Users\陈强\.dsh\skills\save-state" ^
-         "C:\Users\陈强\.dsh\plugins\dsh-session-continuity\skills\save-state"
+mklink /J "%USERPROFILE%\.dsh\skills\save-state" ^
+         "<插件目录>\skills\save-state"
 ```
 
 ---

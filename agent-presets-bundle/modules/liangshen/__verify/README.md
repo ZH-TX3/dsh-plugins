@@ -39,7 +39,7 @@ node drive-real-session.mjs   # 真实模型：initial 2 -> change 46
 脚本从本机 DSH 安装目录解析真实实现：
 
 ```
-D:/nvm/v24.18.1/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/
+<node 安装目录>/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/
   ├── cordis/                    (Context, Service)
   ├── dsh-session/               (Session)
   └── dsh-session-projection/    (SessionProjectionRegistry)

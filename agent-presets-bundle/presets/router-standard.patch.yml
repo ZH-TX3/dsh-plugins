@@ -136,11 +136,12 @@
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
               # 直接复用 Claude Code 的技能集：agentsHome 指向 .claude，
-              # 于是 user-agents 技能根 = C:\Users\陈强\.claude\skills，
+              # 于是 user-agents 技能根 = <Claude 家目录>\skills，
               # 与 Claude Code 共用同一份启用清单（8 个软链接），随它切换。
               # dshHome 保持默认（不能指向 .claude —— 那是 $DSH_HOME，控制
               # profiles/sessions/settings/credentials 等整个 dsh 家目录）。
-              agentsHome: 'C:\Users\陈强\.claude'
+              # 可移植：优先 CLAUDE_CONFIG_DIR，否则 Windows 用户目录下的 .claude。
+              agentsHome: !!js process.env.CLAUDE_CONFIG_DIR ?? (process.env.USERPROFILE + '/.claude')
 
           - id: tool-skill
             name: '@deepseek-ai/dsh-tool-skill'

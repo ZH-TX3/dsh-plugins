@@ -6,12 +6,15 @@
  *   - real plugin `apply()` functions from the bundle
  */
 import { pathToFileURL } from 'node:url'
-const NM = 'D:/nvm/v24.18.1/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai'
+import { dirname, join } from 'node:path'
+
+const NM = process.env.DSH_AI_BASE ??
+  join(dirname(process.execPath), 'node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai')
 const { Context } = await import(pathToFileURL(`${NM}/cordis/lib/index.js`).href)
 const { default: SessionProjectionRegistry } =
   await import(pathToFileURL(`${NM}/dsh-session-projection/lib/index.js`).href)
 const { Session } = await import(pathToFileURL(`${NM}/dsh-session/lib/index.js`).href)
-const B = 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen'
+const B = new URL('..', import.meta.url).href.replace(/\/$/, '')
 const { apply: applyBootstrap } = await import(`${B}/tool-bootstrap.mjs`)
 const { apply: applyHint } = await import(`${B}/instruction-hint.mjs`)
 const { epochProjectionKey } = await import(`${B}/compaction-epoch.mjs`)

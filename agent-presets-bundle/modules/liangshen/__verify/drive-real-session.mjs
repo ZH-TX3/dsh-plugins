@@ -27,7 +27,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 const DSH = process.env.DSH_INSTALL
-  ?? 'D:/nvm/v24.18.1/node_modules/@deepseek-ai/dsh'
+  ?? join(dirname(process.execPath), 'node_modules/@deepseek-ai/dsh')
 
 const { runProfile } = await import(pathToFileURL(`${DSH}/lib/profile-boot.js`).href)
 const { loadLayeredEnv } = await import(

@@ -8,11 +8,16 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { zstdDecompressSync } from 'node:zlib'
 import { pathToFileURL } from 'node:url'
-const NM = 'D:/nvm/v24.18.1/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai'
+import { dirname, join } from 'node:path'
+const SESSIONS = (process.env.DSH_HOME ?? join(homedir(), '.dsh')) + '/sessions'
+import { homedir } from 'node:os'
+
+const NM = process.env.DSH_AI_BASE ??
+  join(dirname(process.execPath), 'node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai')
 const { Context } = await import(pathToFileURL(`${NM}/cordis/lib/index.js`).href)
 const { default: Registry } = await import(pathToFileURL(`${NM}/dsh-session-projection/lib/index.js`).href)
 const { Session } = await import(pathToFileURL(`${NM}/dsh-session/lib/index.js`).href)
-const B = 'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen'
+const B = new URL('..', import.meta.url).href.replace(/\/$/, '')
 const { apply: applyBootstrap } = await import(`${B}/tool-bootstrap.mjs`)
 
 const tick = (ms = 25) => new Promise(r => setTimeout(r, ms))
@@ -29,7 +34,7 @@ function decode(p) {
 
 // Pick one real liangshen session whose first request was NOT anchored.
 let target = null
-for (const f of walk('C:/Users/陈强/.dsh/sessions')) {
+for (const f of walk(SESSIONS)) {
   let evs; try { evs = decode(f) } catch { continue }
   const h = evs.find(e => e.type === 'session'); if (!h) continue
   if (h.agentPreset !== 'liangshen') continue

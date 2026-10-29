@@ -10,8 +10,12 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { zstdDecompressSync } from 'node:zlib'
 import { pathToFileURL } from 'node:url'
 
-const { createEpochProjection } = await import(
-  'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen/compaction-epoch.mjs')
+const B = new URL('..', import.meta.url).href.replace(/\/$/, '')
+const SESSIONS = (process.env.DSH_HOME ?? join(homedir(), '.dsh')) + '/sessions'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+
+const { createEpochProjection } = await import(`${B}/compaction-epoch.mjs`)
 const def = createEpochProjection(['tool/call'])
 
 function decode(path) {
@@ -35,7 +39,7 @@ function walk(dir, out = []) {
   }
   return out
 }
-const files = walk("C:/Users/陈强/.dsh/sessions")
+const files = walk(SESSIONS)
 
 let withPreset = 0, cold = 0, promoted = 0, reanchored = 0
 const rows = []

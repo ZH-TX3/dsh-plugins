@@ -3,7 +3,11 @@
  * real Session and show it fails, then the POST-FIX path and show it works.
  */
 import { pathToFileURL } from 'node:url'
-const NM = 'D:/nvm/v24.18.1/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai'
+import { dirname, join } from 'node:path'
+const B = new URL('..', import.meta.url).href.replace(/\/$/, '')
+
+const NM = process.env.DSH_AI_BASE ??
+  join(dirname(process.execPath), 'node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai')
 const { Session } = await import(pathToFileURL(`${NM}/dsh-session/lib/index.js`).href)
 let fail = 0
 const ok = (l, c, d = '') => { console.log((c ? 'PASS' : 'FAIL') + '  ' + l + (d ? ' — ' + d : '')); if (!c) fail++ }
@@ -26,8 +30,7 @@ try { sess.events.some(() => true) } catch (e) { oldErr2 = e }
 ok('pre-fix `session.events.some(...)` also throws', oldErr2 !== null, oldErr2?.message)
 
 // 2. Post-fix: the projection path yields the right answer with NO history read.
-const { createEpochProjection } = await import(
-  'file:///D:/ds/dsh-plugins/agent-presets-bundle/modules/liangshen/compaction-epoch.mjs')
+const { createEpochProjection } = await import(`${B}/compaction-epoch.mjs`)
 const def = createEpochProjection(['tool/call'])
 let st = def.init()
 for (const ev of sess.log) st = def.apply(st, ev)   // the registry's own fold
