@@ -11,9 +11,13 @@ jobs:
     name: 静态检查
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 是给 sub:check 用的：浅克隆的子模块只抓默认分支，
+      # 指针钉在非默认分支（forge → feat/agent-mode）时，for-each-ref --contains
+      # 看不到那个 ref，会把已推送的提交误判成「不在任何远端分支上」。
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
