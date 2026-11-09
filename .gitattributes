@@ -1,0 +1,2 @@
+# 脚本必须保持 LF，否则 Git Bash 里会报 $'': command not found
+*.sh text eol=lf
